@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quiz_app/utils/color_constant.dart';
-import 'package:quiz_app/utils/question_db.dart';
+
+import 'package:quiz_app/view/question_db/question_db.dart';
 import 'package:quiz_app/view/result_screen/result_screen.dart';
 
 class QuestionScreen extends StatefulWidget {
