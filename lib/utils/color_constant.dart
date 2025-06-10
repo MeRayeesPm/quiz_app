@@ -9,4 +9,5 @@ class ColorConstants {
   static const myCustomGrey = Color.fromARGB(255, 81, 80, 80);
   static const myCustomOrange = Colors.orange;
   static const myCustomGreen = Colors.green;
+  static const myCustomGreen1 = Colors.green;
 }
