@@ -10,4 +10,5 @@ class ColorConstants {
   static const myCustomOrange = Colors.orange;
   static const myCustomGreen = Colors.green;
   static const myCustomGreen1 = Colors.green;
+  static const myCustomYellow = Colors.yellow;
 }
