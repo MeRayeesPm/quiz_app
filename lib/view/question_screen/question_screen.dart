@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:quiz_app/utils/color_constant.dart';
 
-import 'package:quiz_app/view/question_db/question_db.dart';
 import 'package:quiz_app/view/result_screen/result_screen.dart';
 
 class QuestionScreen extends StatefulWidget {
-  const QuestionScreen({super.key});
+  final List<Map<String, dynamic>> questions;
+
+  const QuestionScreen({super.key, required this.questions});
 
   @override
   State<QuestionScreen> createState() => _QuestionScreenState();
@@ -15,22 +16,24 @@ class _QuestionScreenState extends State<QuestionScreen> {
   // ColorConstants colorconstobj = ColorConstants();
   int questionIndex = 0;
   int? selectedAnswerIndex;
+  bool isAnswerLocked = false;
+  int correctAnswers = 0;
+
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: ColorConstants.myCustomBlack,
       appBar: AppBar(
         backgroundColor: ColorConstants.myCustomTransparent,
         actions: [
           Text(
-            "  ${questionIndex + 1}/${QuestionDb.questions.length}",
-            style: TextStyle(
-                color: questionIndex >= 5
-                    ? Colors.red
-                    : ColorConstants.myCustomBlue),
+            "  ${questionIndex + 1}/${widget.questions.length}",
+            style: TextStyle(color: getQuestionIndexColor()),
           ),
           SizedBox(
-            width: 20,
+            width: screenWidth * 0.02,
           ),
         ],
       ),
@@ -46,25 +49,34 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     borderRadius: BorderRadius.circular(10),
                     color: ColorConstants.myCustomGrey),
                 child: Text(
-                  QuestionDb.questions[questionIndex]["question"],
+                  widget.questions[questionIndex]["question"],
                   style: TextStyle(
                       color: ColorConstants.myCustomWhite, height: 1.5),
                 ),
               ),
               SizedBox(
-                height: 100,
+                height: screenHeight * 0.1,
               ),
               ListView.separated(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
-                itemCount:
-                    QuestionDb.questions[questionIndex]["options"].length,
+                itemCount: widget.questions[questionIndex]["options"].length,
                 itemBuilder: (context, index) => InkWell(
-                  onTap: () {
-                    selectedAnswerIndex = index;
-                    print(selectedAnswerIndex);
-                    setState(() {});
-                  },
+                  onTap: isAnswerLocked
+                      ? null
+                      : () {
+                          selectedAnswerIndex = index;
+                          isAnswerLocked = true;
+
+                          // Increment correct answer count if the selected
+                          // option matches the correct answer for this question
+                          if (index ==
+                              widget.questions[questionIndex]["answer"]) {
+                            correctAnswers++;
+                          }
+
+                          setState(() {});
+                        },
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                     decoration: BoxDecoration(
@@ -94,8 +106,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                         Expanded(
                           flex: 4,
                           child: Text(
-                            QuestionDb.questions[questionIndex]["options"]
-                                [index],
+                            widget.questions[questionIndex]["options"][index],
                             style: TextStyle(
                               color: ColorConstants.myCustomWhite,
                               height: 1.5,
@@ -119,30 +130,38 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   ),
                 ),
                 separatorBuilder: (context, index) => SizedBox(
-                  height: 20,
+                  height: screenHeight * 0.02,
                 ),
               ),
               SizedBox(
-                height: 30,
+                height: screenHeight * 0.20,
               ),
               InkWell(
                 onTap: () {
-                  selectedAnswerIndex = null;
-                  if (questionIndex < QuestionDb.questions.length - 1) {
+                  if (questionIndex < widget.questions.length - 1) {
                     questionIndex++;
+                    selectedAnswerIndex = null;
+                    isAnswerLocked = false;
                     print(questionIndex);
                     setState(() {});
                   } else {
+                    final totalQuestions = widget.questions.length;
+                    final percentage = (correctAnswers / totalQuestions) * 100;
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ResultScreen(),
+                        builder: (context) => ResultScreen(
+                          correctAnswers: correctAnswers,
+                          totalQuestions: totalQuestions,
+                          percentage: percentage,
+                        ),
                       ),
                     );
                   }
                 },
                 child: Container(
-                  height: 60,
+                  height: screenHeight * 0.07,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(15),
                     color: ColorConstants.myCustomBlue,
@@ -151,7 +170,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     child: Text(
                       "Next",
                       style: TextStyle(
-                          color: ColorConstants.myCustomWhite, height: 1.5),
+                          fontSize: 20,
+                          color: ColorConstants.myCustomWhite,
+                          height: 1.5),
                     ),
                   ),
                 ),
@@ -163,17 +184,29 @@ class _QuestionScreenState extends State<QuestionScreen> {
     );
   }
 
+  // To get the color for question index text
+  Color getQuestionIndexColor() {
+    if (questionIndex >= 8 && questionIndex <= 10) {
+      return Colors.red;
+    } else if (questionIndex >= 6 && questionIndex <= 7) {
+      return Colors.orange;
+    } else if (questionIndex >= 3 && questionIndex <= 5) {
+      return Colors.green;
+    } else {
+      return ColorConstants.myCustomBlue;
+    }
+  }
+
 //// To show the correct color on answer selection
 
   Color getRightAnswer(int index) {
     if (selectedAnswerIndex != null &&
-        index == QuestionDb.questions[questionIndex]["answer"]) {
+        index == widget.questions[questionIndex]["answer"]) {
       return ColorConstants.myCustomGreen;
     }
 
     if (selectedAnswerIndex == index) {
-      if (selectedAnswerIndex ==
-          QuestionDb.questions[questionIndex]["answer"]) {
+      if (selectedAnswerIndex == widget.questions[questionIndex]["answer"]) {
         return ColorConstants.myCustomGreen;
       } else {
         return ColorConstants.myCustomRed;
@@ -185,13 +218,12 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
   Widget? buildRightAnswerIcons(int index) {
     if (selectedAnswerIndex != null &&
-        index == QuestionDb.questions[questionIndex]["answer"]) {
+        index == widget.questions[questionIndex]["answer"]) {
       return Icon(Icons.done, color: ColorConstants.myCustomWhite);
     }
 
     if (selectedAnswerIndex == index) {
-      if (selectedAnswerIndex ==
-          QuestionDb.questions[questionIndex]["answer"]) {
+      if (selectedAnswerIndex == widget.questions[questionIndex]["answer"]) {
         return Icon(Icons.done, color: ColorConstants.myCustomWhite);
       } else {
         return Icon(Icons.close, color: ColorConstants.myCustomWhite);

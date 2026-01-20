@@ -4,8 +4,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:quiz_app/utils/color_constant.dart';
+import 'package:quiz_app/view/home_screen/home_screen.dart';
 // import 'package:quiz_app/view/home_screen/home_screen.dart';
-import 'package:quiz_app/view/question_screen/question_screen.dart';
+// import 'package:quiz_app/view/question_screen/question_screen.dart';
 
 // import 'package:netflix_dec/view/user_name_screen/user_name_screen.dart';
 
@@ -19,35 +20,31 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
+    super.initState();
     Timer(
-      Duration(seconds: 5),
+      const Duration(seconds: 3),
       () {
         Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => QuestionScreen(),
+              builder: (context) => const HomeScreen(),
             ));
       },
     );
-    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: ColorConstants.myCustomBlack,
+      backgroundColor: ColorConstants.myCustomWhite,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              '''QUIZ
-                 APP''',
-              style: TextStyle(
-                  fontSize: 37, fontWeight: FontWeight.bold, color: Colors.red),
-            ),
+            Image.asset("assets/images/Quiz_Logo.webp"),
             SizedBox(
-              height: 20,
+              height: screenHeight * 0.2,
             ),
             CircularProgressIndicator(
               color: ColorConstants.myCustomRed,
